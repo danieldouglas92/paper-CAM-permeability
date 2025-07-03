@@ -1,0 +1,75 @@
+# This is an ASPECT file which generates the initial temperature
+# and pressures for use in determine the fluid flux out of the CAM
+# subducting plate.
+
+set World builder file                         = test.wb
+set Adiabatic surface temperature              = 1623
+set Nonlinear solver scheme                    = no Advection, no Stokes
+set Output directory                           = test-lithostatic-P-CAM
+set Dimension                                  = 2
+set End time                                   = 0
+set CFL number                                 = 1.0
+set Surface pressure                           = 0
+set Maximum time step                          = 1000
+
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Box origin X coordinate = 190e3
+    set Box origin Y coordinate = 0
+
+    set X extent                = 256e3
+    set Y extent                = 256e3
+
+    set X repetitions           = 1
+    set Y repetitions           = 1
+  end
+end
+
+subsection Initial composition model
+  set List of model names =  world builder 
+end
+
+subsection Initial temperature model
+  set List of model names = world builder 
+end
+
+subsection Compositional fields
+  set Number of fields = 5
+  set Names of fields  = Mantle, Overriding_Plate, Subducting_Crust, Subducting_Gabbro, Subducting_Perid
+end
+
+subsection Gravity model
+  set Model name =  vertical
+  subsection Vertical
+    set Magnitude = 9.81
+  end
+end
+
+subsection Material model
+  set Model name =  visco plastic
+  subsection Visco Plastic
+    set Densities             = 3300, 3300, 2700, 2900, 3100, 3300
+    set Thermal expansivities = 0
+    set Viscous flow law      = diffusion
+  end
+end
+
+subsection Mesh refinement
+  set Coarsening fraction         = 0
+  set Refinement fraction         = 1.0
+  set Initial global refinement   = 4
+  set Initial adaptive refinement = 6
+  set Strategy                    = isosurfaces
+  subsection Isosurfaces
+    set Isosurfaces = max, max, Subducting_Crust: 0.5|1.0; max, max, Subducting_Gabbro: 0.5|1.0; max, max, Subducting_Perid: 0.5|1.0
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors =  visualization,  temperature statistics,  composition statistics
+  subsection Visualization
+    set List of output variables =  depth,  heat flux map,  material properties
+    set Number of grouped files  = 1
+  end
+end
